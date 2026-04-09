@@ -1,0 +1,53 @@
+{
+  "summary": [
+    {
+      "device": "cpu",
+      "method": "deep",
+      "samples": 1,
+      "noise_type": "gauss",
+      "noise_level": 25,
+      "mean_mse": 0.010026768781244755,
+      "mean_psnr_db": 19.98839020729065,
+      "latency_ms": 1.1061999994126381,
+      "images_per_second": 903.995661300825,
+      "speedup_vs_cpu": 1.0
+    },
+    {
+      "device": "cpu",
+      "method": "mean",
+      "samples": 1,
+      "noise_type": "gauss",
+      "noise_level": 25,
+      "mean_mse": 0.012912824749946594,
+      "mean_psnr_db": 18.889787197113037,
+      "latency_ms": 0.3116000007139519,
+      "images_per_second": 3209.2426113888164,
+      "speedup_vs_cpu": 1.0
+    },
+    {
+      "device": "cpu",
+      "method": "gaussian",
+      "samples": 1,
+      "noise_type": "gauss",
+      "noise_level": 25,
+      "mean_mse": 0.010319828055799007,
+      "mean_psnr_db": 19.863275289535522,
+      "latency_ms": 0.41740000051504467,
+      "images_per_second": 2395.7834182224833,
+      "speedup_vs_cpu": 1.0
+    },
+    {
+      "device": "cpu",
+      "method": "median",
+      "samples": 1,
+      "noise_type": "gauss",
+      "noise_level": 25,
+      "mean_mse": 0.010934416204690933,
+      "mean_psnr_db": 19.612044095993042,
+      "latency_ms": 1.4050000008865027,
+      "images_per_second": 711.7437717929091,
+      "speedup_vs_cpu": 1.0
+    }
+  ],
+  "per_image_count": 4
+}

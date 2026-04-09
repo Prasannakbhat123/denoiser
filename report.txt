@@ -1,0 +1,78 @@
+Mini-Project-Report
+Project Title    
+CUDA-Accelerated Image Denoising: Classical and Deep Learning Approaches
+
+SUBMITTED
+BY 
+
+Team Members:
+
+
+				NAME:  		RITESH GUPTA
+ROLL NO.:		59
+REG NO.:		230905480
+
+NAME:		SHUBHAM PANDA
+ROLL NO.:		60
+REG NO.:		230905490
+
+NAME:		PRASANNA 
+ROLL NO.:		61
+REG NO.:		230905506
+
+Under the Guidance of 
+Sandhya Parasnath Dubey
+Assistant Professor 
+School of Computer Engineering
+MIT Manipal
+2. Introduction
+Digital images play a crucial role in various real-world applications such as medical imaging, surveillance systems, autonomous driving, satellite imaging, and multimedia processing. However, during image acquisition, transmission, or storage, images are often corrupted by different types of noise, including Gaussian noise, salt-and-pepper noise, and sensor noise. These distortions degrade the visual quality of images and significantly affect the performance of subsequent image processing tasks such as edge detection, segmentation, feature extraction, and object recognition.
+Image denoising is therefore an essential preprocessing step in the field of digital image processing. The primary objective of denoising is to remove unwanted noise while preserving important image features such as edges, textures, and fine details. Achieving this balance is challenging, as excessive smoothing can lead to loss of critical information, while insufficient noise removal can leave artifacts in the image.
+Traditional image denoising techniques are based on spatial filtering methods. Mean filtering, one of the simplest approaches, reduces noise by averaging neighboring pixel values but often results in blurred edges. Gaussian filtering improves upon this by applying a weighted averaging process using a Gaussian kernel, providing better smoothing while maintaining structural information. Median filtering, a non-linear technique, is particularly effective for removing impulse noise such as salt-and-pepper noise, while preserving edge sharpness. These techniques rely heavily on convolution operations, which are computationally intensive, especially for high-resolution images or real-time applications.
+With the increasing demand for faster and more efficient image processing, parallel computing has emerged as a powerful solution. Graphics Processing Units (GPUs) are specifically designed to handle large-scale parallel computations. CUDA (Compute Unified Device Architecture), developed by NVIDIA, enables developers to execute image processing algorithms in parallel across multiple GPU cores. This significantly accelerates operations such as convolution, filtering, and pixel-wise transformations compared to traditional CPU-based implementations. By leveraging CUDA, it is possible to reduce execution time and improve the efficiency of image denoising systems.
+In recent years, deep learning-based approaches have gained popularity for image denoising. Convolutional Neural Networks (CNNs) are capable of learning complex noise distributions directly from data, resulting in superior denoising performance compared to traditional methods. Techniques such as Noise2Noise and Zero-Shot Noise2Noise (ZSN2N) further enhance flexibility by enabling effective denoising without requiring clean ground-truth images during training. However, these methods are computationally expensive and often function as black-box models, making it important to compare them with classical approaches in terms of both performance and interpretability.
+This project aims to develop a comprehensive image denoising system that integrates classical filtering techniques, CUDA-based parallel implementations, and deep learning-based methods. The system will perform a detailed comparison between CPU-based and GPU-based implementations in terms of execution time, speedup, and computational efficiency. Additionally, the quality of denoised images will be evaluated using quantitative metrics such as Mean Squared Error (MSE) and Peak Signal-to-Noise Ratio (PSNR), along with visual analysis.
+By combining traditional image processing methods with modern parallel computing and deep learning techniques, this project provides a holistic approach to image denoising. It highlights the advantages of GPU acceleration using CUDA and demonstrates the trade-offs between classical and AI-based approaches in terms of performance, accuracy, and computational cost.
+3. Literature Review
+Image denoising has been a fundamental research area in digital image processing, with the primary objective of removing noise while preserving important structural details such as edges and textures. Over the years, a wide range of techniques have been developed, broadly categorized into classical filtering methods, advanced model-based approaches, and deep learning-based techniques.
+Traditional denoising methods are based on spatial filtering techniques. Mean filtering is one of the simplest approaches, where each pixel value is replaced by the average of its neighboring pixels. Although effective in reducing Gaussian noise, it often results in excessive smoothing and loss of edge details. Gaussian filtering improves upon mean filtering by using a weighted averaging approach based on a Gaussian kernel, which gives higher importance to central pixels and produces smoother results while preserving some structural information. Median filtering, a non-linear technique, replaces each pixel value with the median of its neighborhood and is particularly effective in removing impulse noise such as salt-and-pepper noise without significantly blurring edges.
+In addition to these basic filters, more advanced methods such as bilateral filtering and non-local means (NLM) have been proposed. Bilateral filtering considers both spatial proximity and pixel intensity similarity, enabling better edge preservation. Non-local means further enhances denoising performance by exploiting redundancy in image patches across the entire image. However, these methods are computationally expensive and not suitable for real-time applications without optimization.
+With the rise of machine learning, deep learning-based approaches have significantly advanced the field of image denoising. Convolutional Neural Networks (CNNs), such as DnCNN, utilize residual learning to effectively model noise and restore clean images. The Noise2Noise framework introduced a novel concept of training models using only noisy image pairs, eliminating the need for clean ground-truth data. Zero-Shot Noise2Noise (ZSN2N) further extends this idea by enabling image-specific training without requiring any external dataset, making it highly flexible and adaptable to different noise conditions. These approaches achieve superior denoising performance but require substantial computational resources and often lack interpretability compared to classical methods.
+Parallel computing techniques have been widely explored to address the computational challenges associated with image processing algorithms. Graphics Processing Units (GPUs), with their massively parallel architecture, are well-suited for handling pixel-wise operations. CUDA (Compute Unified Device Architecture) provides a programming model that allows developers to implement image processing algorithms using parallel threads, blocks, and grids. Operations such as convolution, filtering, and edge detection can be efficiently parallelized, leading to significant reductions in execution time. Research studies have demonstrated that CUDA-accelerated implementations of filtering and convolution operations achieve considerable speedup compared to CPU-based implementations, especially for high-resolution images.
+Despite the availability of numerous denoising techniques, there exists a trade-off between computational efficiency, implementation complexity, and denoising quality. Classical methods are simple and interpretable but may not achieve high-quality results, while deep learning methods provide superior performance at the cost of higher computational requirements. GPU acceleration using CUDA offers a promising solution to bridge this gap by enhancing the efficiency of both classical and advanced algorithms.
+This project builds upon the existing body of work by integrating classical filtering techniques, deep learning-based denoising methods, and CUDA-based parallel processing. It aims to provide a comprehensive comparison of these approaches in terms of image quality and computational performance, thereby demonstrating the effectiveness of GPU acceleration in modern image denoising systems.
+4. Problem Statement
+Digital images acquired in real-world environments are frequently affected by various types of noise, including Gaussian noise, salt-and-pepper noise, and sensor noise. These distortions degrade the visual quality of images and adversely impact the performance of subsequent image processing tasks such as edge detection, segmentation, feature extraction, and object recognition. As a result, effective image denoising becomes a critical preprocessing step in many practical applications, including medical imaging, surveillance systems, and computer vision.
+Traditional image denoising techniques such as mean filtering, Gaussian filtering, and median filtering are widely used due to their simplicity and ease of implementation. However, these methods exhibit significant limitations. While they are capable of reducing noise, they often lead to undesirable smoothing effects, resulting in the loss of important image details such as edges and textures. Furthermore, these techniques rely heavily on convolution operations, which become computationally expensive when applied to high-resolution images or real-time systems, especially when executed on conventional CPU architectures.
+Recent advancements in deep learning have introduced more sophisticated denoising approaches based on convolutional neural networks (CNNs), which can effectively learn complex noise patterns and produce high-quality results. Despite their advantages, these models require substantial computational resources, increased training time, and often behave as black-box systems with limited interpretability. Additionally, their performance may vary depending on the type of noise and training data used.
+Given these challenges, there is a need to design an image denoising system that balances denoising quality, computational efficiency, and scalability. The system should be capable of handling different types of noise while preserving critical image features, and should also leverage modern computing techniques to improve performance.
+Therefore, the key problem addressed in this project is to develop an efficient and scalable image denoising framework that:
+Effectively removes different types of noise while preserving important image features such as edges and textures
+Reduces computational overhead by leveraging parallel processing techniques
+Enables a fair and comprehensive comparison between classical filtering methods and deep learning-based approaches
+Demonstrates the performance advantages of GPU-based implementations over traditional CPU-based methods
+To address this problem, the project proposes the integration of classical image denoising techniques, deep learning-based methods, and CUDA-based parallel acceleration. The system will analyze both the quality of denoised images and the computational performance of CPU and GPU implementations, thereby providing insights into the effectiveness of different denoising strategies.
+5. Objectives
+The primary objectives of this project are:
+To study and understand different types of noise present in digital images and their impact on image quality.
+To implement classical image denoising techniques such as:
+Mean filtering
+Gaussian filtering
+Median filtering
+To design and implement CUDA-based parallel versions of selected image processing operations, particularly convolution and filtering techniques.
+To integrate a deep learning-based image denoising model (Zero-Shot Noise2Noise) for comparison with classical methods.
+To evaluate and compare the performance of CPU-based and CUDA-based implementations in terms of:
+Execution time
+Speedup
+Computational efficiency
+To assess the quality of denoised images using quantitative metrics such as Mean Squared Error (MSE) and Peak Signal-to-Noise Ratio (PSNR), along with visual comparison.
+To develop an interactive application that allows users to upload images, apply different denoising techniques, and visualize results.
+6. References
+[1] R. C. Gonzalez and R. E. Woods, Digital Image Processing, 4th ed., Pearson, 2018.
+[2] NVIDIA, “CUDA C Programming Guide,” Available: https://docs.nvidia.com/cuda/
+[3] OpenCV, “Open Source Computer Vision Library,” Available: https://opencv.org/
+[4] K. Zhang, W. Zuo, Y. Chen, D. Meng, and L. Zhang, “Beyond a Gaussian Denoiser: Residual Learning of Deep CNN for Image Denoising,” IEEE Transactions on Image Processing, vol. 26, no. 7, pp. 3142–3155, 2017.
+[5] J. Lehtinen et al., “Noise2Noise: Learning Image Restoration without Clean Data,” Proceedings of the 35th International Conference on Machine Learning (ICML), 2018.
+[6] A. Buades, B. Coll, and J. M. Morel, “A Non-Local Algorithm for Image Denoising,” IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2005.
+[7] C. Tomasi and R. Manduchi, “Bilateral Filtering for Gray and Color Images,” IEEE International Conference on Computer Vision (ICCV), 1998.
+
