@@ -1,4 +1,5 @@
 import torch
+from cuda_filters import cuda_available, cuda_gaussian_filter, cuda_mean_filter
 from utils import mse, pair_downsampler, mean_filter, gaussian_filter, median_filter
 
 def denoise(model, noisy_img):
@@ -8,16 +9,21 @@ def denoise(model, noisy_img):
     return pred
 
 
-def denoise_with_method(noisy_img, method='deep', model=None, kernel_size=3, sigma=1.0):
+def denoise_with_method(noisy_img, method='deep', model=None, kernel_size=3, sigma=1.0, force_cuda=False):
     method = method.lower()
+    use_cuda = force_cuda or noisy_img.is_cuda
 
     if method == 'deep':
         if model is None:
             raise ValueError("model is required when method='deep'")
         return denoise(model, noisy_img)
     if method == 'mean':
+        if use_cuda and cuda_available():
+            return torch.clamp(cuda_mean_filter(noisy_img, kernel_size=kernel_size), 0, 1)
         return torch.clamp(mean_filter(noisy_img, kernel_size=kernel_size), 0, 1)
     if method == 'gaussian':
+        if use_cuda and cuda_available():
+            return torch.clamp(cuda_gaussian_filter(noisy_img, kernel_size=kernel_size, sigma=sigma), 0, 1)
         return torch.clamp(gaussian_filter(noisy_img, kernel_size=kernel_size, sigma=sigma), 0, 1)
     if method == 'median':
         return torch.clamp(median_filter(noisy_img, kernel_size=kernel_size), 0, 1)

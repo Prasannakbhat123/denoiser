@@ -92,6 +92,7 @@ def run_denoising(
             model=model if method == "deep" else None,
             kernel_size=kernel_size,
             sigma=sigma,
+            force_cuda=torch.cuda.is_available(),
         )
     return current
 

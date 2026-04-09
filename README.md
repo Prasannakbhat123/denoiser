@@ -1,189 +1,108 @@
-# 🖼️ AI Image Denoising App
+# 🖼️ CUDA-Accelerated Image Denoising
 
-A Streamlit-based web application for removing noise from images using a trained neural network model. This project implements a Zero-Shot Noise2Noise (ZSN2N) approach for image denoising.
+This project implements classical image denoising, a deep denoising model, and CUDA-backed filtering so you can compare CPU and GPU execution times and quality metrics.
 
-## Features
+## What This Project Does
 
-- 🚀 Real-time image denoising using deep learning
-- 📱 Interactive web interface built with Streamlit
-- 🎛️ Adjustable noise levels for testing
-- 📊 Image statistics and noise reduction metrics
-- 💾 Download denoised images
-- 🔄 Side-by-side comparison view
-- 📐 Automatic image resizing for optimal performance
+- Real-time image denoising using deep learning
+- Classical mean, Gaussian, and median filtering
+- CUDA-backed mean and Gaussian filtering when an NVIDIA GPU is available
+- CPU vs GPU benchmarking with execution time, speedup, and time-savings percentage
+- Interactive Streamlit interface for image upload and result comparison
 
-## Project Structure
+## Files
 
-```text
-ZSN2N-deploy/
-├── denoisingapp.py      # Main Streamlit application
-├── model.py             # Neural network model definition
-├── training.py          # Training utilities and denoising function
-├── utils.py             # Utility functions (noise addition, etc.)
-├── train_model.py       # Model training script
-├── create_weights.py    # Generate dummy weights (backup)
-├── requirements.txt     # Python dependencies
-├── model_weights.pth    # Trained model weights (generated)
-└── README.md            # This file
+- [denoisingapp.py](denoisingapp.py) - Streamlit frontend
+- [train_model.py](train_model.py) - Training and noisy-dataset generation
+- [benchmark.py](benchmark.py) - CPU/GPU benchmark runner
+- [training.py](training.py) - Denoising dispatcher and loss functions
+- [cuda_filters.py](cuda_filters.py) - Numba CUDA kernels for classical filters
+- [run_project.bat](run_project.bat) - One-click Windows launcher
+
+## Quick Start on Windows
+
+Double-click [run_project.bat](run_project.bat) or run:
+
+```bat
+run_project.bat
 ```
 
-## Setup Instructions
+The batch file will:
 
-### Prerequisites
+1. Create `.venv` if it does not exist
+2. Activate the environment
+3. Upgrade `pip`
+4. Install CUDA-enabled PyTorch wheels when `nvidia-smi` is available, otherwise CPU wheels
+5. Install the remaining packages from [requirements.txt](requirements.txt)
+6. Start the Streamlit app
 
-- Python 3.8 or higher
-- Windows PowerShell (for Windows users)
+## Benchmarking CPU vs GPU
 
-### 1. Clone or Download the Project
+To measure execution time for multiple image sizes and compare CPU vs CUDA:
 
-Download the project files to your local machine and navigate to the project directory.
-
-### 2. Create Virtual Environment
-
-```powershell
-cd "path\to\ZSN2N-deploy"
-python -m venv venv
+```bat
+run_project.bat benchmark
 ```
 
-### 3. Activate Virtual Environment
+This runs the benchmark for sizes `64,128,256` and writes results to `artifacts_benchmark/`.
 
-```powershell
-.\venv\Scripts\Activate.ps1
+The benchmark outputs include:
+
+- `latency_ms`
+- `images_per_second`
+- `speedup_vs_cpu`
+- `time_savings_pct`
+- `mean_mse`
+- `mean_psnr_db`
+
+To compare a different set of sizes, edit the `--sizes` argument in [run_project.bat](run_project.bat) or run [benchmark.py](benchmark.py) directly.
+
+## Training on Clean and Noisy Pairs
+
+To generate a noisy copy dataset and train from paired images:
+
+```bat
+run_project.bat train
 ```
 
-### 4. Install Dependencies
+This creates `data_noisy/` and trains a model using paired clean/noisy images.
 
-```powershell
-pip install --upgrade pip
-pip install -r requirements.txt
-```
+## Notes on CUDA
 
-### 5. Train the Model
+- If CUDA is available, PyTorch uses the GPU for the deep model.
+- Mean and Gaussian classical filters use explicit Numba CUDA kernels when GPU support is available.
+- If no CUDA device is found, the project falls back to CPU automatically.
 
-```powershell
-python train_model.py
-```
+## Report Alignment
 
-### 6. Run the Application
+This implementation supports the report sections for:
 
-```powershell
-streamlit run denoisingapp.py
-```
-
-The application will start and automatically open in your default web browser at:
-- Local URL: http://localhost:8501
-
-## Usage
-
-1. **Upload an Image**: Click "Browse files" and select a JPG, PNG, or JPEG image
-2. **Adjust Noise Level**: Use the slider to add different amounts of noise (0-50)
-3. **View Results**: See the original, noisy, and denoised images side by side
-4. **Download**: Click "Download Denoised Image" to save the result
-5. **Statistics**: Expand "Image Statistics" to see noise reduction metrics
-
-## Model Architecture
-
-The denoising model uses a simple CNN architecture:
-- Input: 3-channel RGB image
-- Conv2d layers with LeakyReLU activation
-- Output: Clean image (noise residual is subtracted)
-
-## Training Details
-
-- **Loss Function**: Zero-Shot Noise2Noise loss with consistency regularization
-- **Optimizer**: Adam with learning rate 0.001
-- **Training Data**: Synthetic images with various patterns and textures
-- **Epochs**: 50 (adjustable in `train_model.py`)
+- Introduction
+- Literature Review
+- Problem Statement
+- Objectives
+- Methodology
+- Experimental Setup
+- Results and Analysis
+- Conclusions and Future Work
 
 ## Troubleshooting
 
-### Virtual Environment Issues
-
-If you get execution policy errors on Windows:
-
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
-### Model Not Found Error
-
-If you see "Model weights file not found":
-
-```powershell
-python train_model.py
-```
-
-### Memory Issues
-
-If you encounter memory issues:
-- Reduce batch size in `train_model.py`
-- Use smaller images (the app automatically resizes to 512px max)
-
-### Dependency Issues
-
-If packages fail to install:
-
-```powershell
-pip install --upgrade pip setuptools wheel
-pip install -r requirements.txt
-```
-
-## Customization
-
-### Modify Training Parameters
-
-Edit `train_model.py` to:
-- Change number of epochs
-- Adjust learning rate
-- Modify synthetic data generation
-- Add real training images
-
-### Adjust Model Architecture
-
-Edit `model.py` to:
-- Add more layers
-- Change activation functions
-- Modify channel dimensions
-
-### UI Customization
-
-Edit `denoisingapp.py` to:
-- Change layout and styling
-- Add new features
-- Modify image processing pipeline
+- If the app starts on a different port, Streamlit may already be running elsewhere.
+- If CUDA is not used, check that `torch.cuda.is_available()` returns `True` on the target PC.
+- If `numba` or CUDA kernels fail, the app still works on CPU.
 
 ## Dependencies
 
-Key dependencies include:
-- `streamlit>=1.28.0` - Web framework
-- `torch>=2.0.0` - Deep learning framework
-- `torchvision>=0.15.0` - Computer vision utilities
-- `Pillow>=9.0.0` - Image processing
-- `numpy>=1.21.0` - Numerical computing
+Main packages:
 
-## Performance Notes
-
-- **CPU Training**: Training on CPU takes ~2-3 minutes
-- **GPU Training**: If CUDA is available, training will be faster
-- **Image Size**: Large images are automatically resized to 512px max
-- **Memory**: Typical memory usage is 200-500MB
-
-## Future Improvements
-
-- [ ] Support for different noise types (Poisson, salt-and-pepper)
-- [ ] Batch processing for multiple images
-- [ ] Real-time webcam denoising
-- [ ] Advanced model architectures (U-Net, DnCNN)
-- [ ] Training on real image datasets
-
-## License
-
-This project is open source and available under the MIT License.
-
-## Contributing
-
-Feel free to submit issues, feature requests, or pull requests to improve the project!
+- `streamlit`
+- `torch`
+- `torchvision`
+- `numpy`
+- `Pillow`
+- `numba`
 
 ---
 
-**Happy Denoising! 🎨✨**
+If you want a fully CUDA-kernel-based version for more operators later, the project is now set up so it can grow in that direction cleanly.

@@ -79,6 +79,7 @@ def evaluate_on_device(args, device_name):
             per_image_rows.append(
                 {
                     "device": device.type,
+                    "image_size": args.height,
                     "method": method,
                     "image_index": idx,
                     "mse": m,
@@ -100,6 +101,7 @@ def evaluate_on_device(args, device_name):
         summary_rows.append(
             {
                 "device": device.type,
+                "image_size": args.height,
                 "method": method,
                 "samples": args.samples,
                 "noise_type": args.noise_type,
@@ -125,12 +127,16 @@ def add_speedup(summary_rows):
         if cpu_row and gpu_row and gpu_row["latency_ms"] > 0:
             speedup = cpu_row["latency_ms"] / gpu_row["latency_ms"]
             cpu_row["speedup_vs_cpu"] = 1.0
+            cpu_row["time_savings_pct"] = 0.0
             gpu_row["speedup_vs_cpu"] = float(speedup)
+            gpu_row["time_savings_pct"] = float(max(0.0, (1.0 - (gpu_row["latency_ms"] / cpu_row["latency_ms"])) * 100.0))
         else:
             if cpu_row:
                 cpu_row["speedup_vs_cpu"] = 1.0
+                cpu_row["time_savings_pct"] = 0.0
             if gpu_row:
                 gpu_row["speedup_vs_cpu"] = None
+                gpu_row["time_savings_pct"] = None
 
 
 def write_outputs(output_dir, summary_rows, per_image_rows):
@@ -139,6 +145,7 @@ def write_outputs(output_dir, summary_rows, per_image_rows):
     summary_path = os.path.join(output_dir, "benchmark_summary.csv")
     summary_fields = [
         "device",
+        "image_size",
         "method",
         "samples",
         "noise_type",
@@ -148,6 +155,7 @@ def write_outputs(output_dir, summary_rows, per_image_rows):
         "latency_ms",
         "images_per_second",
         "speedup_vs_cpu",
+        "time_savings_pct",
     ]
     with open(summary_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=summary_fields)
@@ -155,7 +163,7 @@ def write_outputs(output_dir, summary_rows, per_image_rows):
         writer.writerows(summary_rows)
 
     detail_path = os.path.join(output_dir, "benchmark_per_image.csv")
-    detail_fields = ["device", "method", "image_index", "mse", "psnr_db"]
+    detail_fields = ["device", "image_size", "method", "image_index", "mse", "psnr_db"]
     with open(detail_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=detail_fields)
         writer.writeheader()
@@ -177,6 +185,7 @@ def parse_args():
     parser.add_argument("--samples", type=int, default=8)
     parser.add_argument("--height", type=int, default=128)
     parser.add_argument("--width", type=int, default=128)
+    parser.add_argument("--sizes", type=str, default="", help="Comma-separated square image sizes to benchmark, e.g. 64,128,256")
     parser.add_argument("--noise-type", type=str, default="gauss", choices=["gauss", "poiss"])
     parser.add_argument("--noise-level", type=int, default=25)
     parser.add_argument("--kernel-size", type=int, default=3)
@@ -190,6 +199,22 @@ def parse_args():
     return parser.parse_args()
 
 
+def _parse_sizes(args):
+    if not args.sizes.strip():
+        return [args.height]
+
+    sizes = []
+    for item in args.sizes.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        sizes.append(int(item))
+
+    if not sizes:
+        return [args.height]
+    return sizes
+
+
 def main():
     args = parse_args()
     run_benchmark(args)
@@ -200,14 +225,21 @@ def run_benchmark(args):
     all_summary = []
     all_per_image = []
 
-    summary_cpu, per_image_cpu = evaluate_on_device(args, "cpu")
-    all_summary.extend(summary_cpu)
-    all_per_image.extend(per_image_cpu)
+    sizes = _parse_sizes(args)
 
-    if (not args.cpu_only) and torch.cuda.is_available():
-        summary_gpu, per_image_gpu = evaluate_on_device(args, "cuda")
-        all_summary.extend(summary_gpu)
-        all_per_image.extend(per_image_gpu)
+    for size in sizes:
+        sized_args = argparse.Namespace(**vars(args))
+        sized_args.height = size
+        sized_args.width = size
+
+        summary_cpu, per_image_cpu = evaluate_on_device(sized_args, "cpu")
+        all_summary.extend(summary_cpu)
+        all_per_image.extend(per_image_cpu)
+
+        if (not sized_args.cpu_only) and torch.cuda.is_available():
+            summary_gpu, per_image_gpu = evaluate_on_device(sized_args, "cuda")
+            all_summary.extend(summary_gpu)
+            all_per_image.extend(per_image_gpu)
 
     add_speedup(all_summary)
 
